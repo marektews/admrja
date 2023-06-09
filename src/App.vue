@@ -105,6 +105,7 @@ function onSave() {
         sid: select_sector.value.sid,
         rja: sector_buses.value
     }
+    console.log('onSave:', data)
     fetch('/api/rja/buses/save', {
         method: "POST",
         headers: {
@@ -131,6 +132,40 @@ function onShowTimingModal() {
 
 function onModifyTiming(timings) {
     console.log('onModifyTiming:', timings)
+    let time_d1 = _create_time(timings.d1)
+    let time_d2 = _create_time(timings.d2)
+    let time_d3 = _create_time(timings.d3)
+    let step = parseInt(timings.step)*60
+    let delay = 0
+    sector_buses.value.forEach((item) => {
+        item.d1 = _add_time(time_d1, delay)
+        item.d2 = _add_time(time_d2, delay)
+        item.d3 = _add_time(time_d3, delay)
+        delay += step
+    })
+}
+
+function _create_time(time_str) {
+    let d = new Date()
+    let sl = time_str.split(':')
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), parseInt(sl[0]), parseInt(sl[1]))
+}
+
+function _add_time(time, seconds) {
+    let t = new Date()
+    t.setTime(time.getTime() + seconds*1000)
+    return time_format(t)
+}
+
+function time_format(d) {
+    let hours = format_two_digits(d.getHours())
+    let minutes = format_two_digits(d.getMinutes())
+    return hours + ":" + minutes
+}
+
+function format_two_digits(n) {
+    let s = n<10 ? `0${n}` : `${n}`
+    return s
 }
 </script>
 

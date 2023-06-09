@@ -13,12 +13,12 @@ const props = defineProps({
 
 const _zbor_id = computed({
     get() {
-        console.log('_zbor_id : get()', props.rjItem)
+        // console.log('_zbor_id : get()', props.rjItem)
         let tmp = props.sra?.find((item) => item.id === props.rjItem.sra_id)
         return tmp?.zbor_id
     },
     set(zbor_id) {
-        console.log('Select zbor id:', zbor_id)
+        // console.log('Select zbor id:', zbor_id)
         let tmp = props.sra.find((item) => item.zbor_id === zbor_id)
         props.rjItem.sra_id = tmp.id
     }
