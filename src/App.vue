@@ -5,6 +5,7 @@ import Sectors from './components/Sectors.vue'
 import RjItem from './components/RjItem.vue'
 import Ops from './components/Ops.vue'
 import TimingModal from './components/TimingModal.vue'
+import Toasts from './components/Toasts.vue'
 
 const zbory = ref([])
 const sra = ref([])
@@ -117,9 +118,13 @@ function onSave() {
         if(response.status === 200) {
             console.log('RJA: save buses of sector:', select_sector.value.sid, 'OK')
             load_rja(select_sector.value)
+            const toast = new bootstrap.Toast("#saveOk")
+            toast.show()
         }
         else {
             console.error('RJA: save buses of sector:', select_sector.value.sid, 'response:', response)
+            const toast = new bootstrap.Toast("#saveError")
+            toast.show()
         }
     })
     .catch(err => console.error('RJA: save buses of sector:', select_sector.value.sid, 'exception:', err))
@@ -221,6 +226,8 @@ function format_two_digits(n) {
                 id="timingModal"
                 @ok="onModifyTiming"
             />
+
+            <Toasts />
         </main>
     </div>
 </template>
