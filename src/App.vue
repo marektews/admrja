@@ -7,8 +7,8 @@ import Ops from './components/Ops.vue'
 import TimingModal from './components/TimingModal.vue'
 import Toasts from './components/Toasts.vue'
 
-const zbory = ref([])
-const sra = ref([])
+const zbory = ref([])       // lista zborów
+const sra = ref([])         // lista zarejestrowanych autokarów
 const terminals = ref([])
 const sectors = ref([])
 const select_sector = ref(undefined)
@@ -141,11 +141,21 @@ function onModifyTiming(timings) {
     let time_d2 = _create_time(timings.d2)
     let time_d3 = _create_time(timings.d3)
     let step = parseInt(timings.step)*60
+    let arrive = parseInt(timings.arrive)*60
     let delay = 0
     sector_buses.value.forEach((item) => {
-        item.d1 = _add_time(time_d1, delay)
-        item.d2 = _add_time(time_d2, delay)
-        item.d3 = _add_time(time_d3, delay)
+        let tmp = _add_time(time_d1, delay)
+        item.d1 = time_format(tmp)
+        item.a1 = time_format(_add_time(tmp, -arrive))
+
+        tmp = _add_time(time_d2, delay)
+        item.d2 = time_format(tmp)
+        item.a2 = time_format(_add_time(tmp, -arrive))
+        
+        tmp = _add_time(time_d3, delay)
+        item.d3 = time_format(tmp)
+        item.a3 = time_format(_add_time(tmp, -arrive))
+        
         delay += step
     })
 }
@@ -159,7 +169,7 @@ function _create_time(time_str) {
 function _add_time(time, seconds) {
     let t = new Date()
     t.setTime(time.getTime() + seconds*1000)
-    return time_format(t)
+    return t
 }
 
 function time_format(d) {
@@ -193,10 +203,10 @@ function format_two_digits(n) {
                 <thead>
                     <tr>
                         <th scope="col">#</th>
-                        <th scope="col">Zbór</th>
-                        <th scope="col">Piątek</th>
-                        <th scope="col">Sobota</th>
-                        <th scope="col">Niedziela</th>
+                        <th scope="col">Opis pojazdu</th>
+                        <th scope="col">Piątek <small>(podstawienie / odjazd)</small></th>
+                        <th scope="col">Sobota <small>(podstawienie / odjazd)</small></th>
+                        <th scope="col">Niedziela <small>(podstawienie / odjazd)</small></th>
                         <th scope="col">Ops</th>
                     </tr>
                 </thead>
@@ -247,5 +257,9 @@ main {
 
 tr {
     vertical-align: middle;
+}
+
+small {
+    font-size: smaller;
 }
 </style>

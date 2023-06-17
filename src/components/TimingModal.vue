@@ -6,7 +6,8 @@ const timings = reactive({
     d1: localStorage.getItem("timing-d1") || '', 
     d2: localStorage.getItem("timing-d2") || '', 
     d3: localStorage.getItem("timing-d3") || '', 
-    step: localStorage.getItem("timing-step") || 10
+    step: localStorage.getItem("timing-step") || 10,
+    arrive: localStorage.getItem("timing-arrive") || 15,
 })
 
 function onOK() {
@@ -14,6 +15,7 @@ function onOK() {
     localStorage.setItem("timing-d2", timings.d2)
     localStorage.setItem("timing-d3", timings.d3)
     localStorage.setItem("timing-step", timings.step)
+    localStorage.setItem("timing-arrive", timings.arrive)
     emit('ok', timings)
 }
 </script>
@@ -40,6 +42,9 @@ function onOK() {
 
                         <div>Odstęp pomiędzy turami (minuty):</div>
                         <input type="number" class="form-control" v-model.number="timings.step">
+
+                        <div>Podstawienie do bufora (minuty przed odjazdem):</div>
+                        <input type="number" class="form-control" v-model.number="timings.arrive">
                     </p>
                 </div>
                 <div class="modal-footer">

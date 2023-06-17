@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import ZborSelector from './ZborSelector.vue'
+import BusSelector from './BusSelector.vue'
 
 defineEmits(['delete'])
 
@@ -11,19 +11,12 @@ const props = defineProps({
     sra: { type: Array },
 })
 
-const _zbor_id = computed({
-    get() {
-        // console.log('_zbor_id : get()', props.rjItem)
-        let tmp = props.sra?.find((item) => item.id === props.rjItem.sra_id)
-        return tmp?.zbor_id
-    },
-    set(zbor_id) {
-        // console.log('Select zbor id:', zbor_id)
-        let tmp = props.sra.find((item) => item.zbor_id === zbor_id)
-        props.rjItem.sra_id = tmp.id
-    }
+const _sra_id = computed({
+    get()  { return props.rjItem.sra_id },
+    set(v) { props.rjItem.sra_id = v }
 })
 
+// odjazdy
 const _d1 = computed({
     get() { return props.rjItem.d1 },
     set(v) { props.rjItem.d1 = v }
@@ -36,25 +29,49 @@ const _d3 = computed({
     get() { return props.rjItem.d3 },
     set(v) { props.rjItem.d3 = v }
 })
+
+//podstawienia
+const _a1 = computed({
+    get() { return props.rjItem.a1 },
+    set(v) { props.rjItem.a1 = v }
+})
+const _a2 = computed({
+    get() { return props.rjItem.a2 },
+    set(v) { props.rjItem.a2 = v }
+})
+const _a3 = computed({
+    get() { return props.rjItem.a3 },
+    set(v) { props.rjItem.a3 = v }
+})
 </script>
 
 <template>
     <tr>
         <th scope="row">{{ index }}</th>
         <td>
-            <ZborSelector 
-                v-model="_zbor_id"
+            <BusSelector 
+                v-model="_sra_id"
                 :zbory="props.zbory"
+                :sra="props.sra"
             />
         </td>
         <td>
-            <input v-model="_d1" type="time" class="form-control" required />
+            <div class="times-layout">
+                <input v-model="_a1" type="time" class="form-control" required /> /
+                <input v-model="_d1" type="time" class="form-control" required />
+            </div>
         </td>
         <td>
-            <input v-model="_d2" type="time" class="form-control" required />
+            <div class="times-layout">
+                <input v-model="_a2" type="time" class="form-control" required /> /
+                <input v-model="_d2" type="time" class="form-control" required />
+            </div>
         </td>
         <td>
-            <input v-model="_d3" type="time" class="form-control" required />
+            <div class="times-layout">
+                <input v-model="_a3" type="time" class="form-control" required /> /
+                <input v-model="_d3" type="time" class="form-control" required />
+            </div>
         </td>
         <td>
             <button class="btn btn-danger" title="Kasowanie" @click="$emit('delete')">
@@ -70,5 +87,13 @@ const _d3 = computed({
     flex-direction: row;
     flex-wrap: nowrap;
     gap: 6pt;
+}
+
+.times-layout {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 1pt;
+    align-items: center;
 }
 </style>
