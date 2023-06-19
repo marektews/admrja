@@ -31,7 +31,7 @@ watch(() => props.sectors, (nv) => {
                 :for="`sector${index}`"
                 @click="$emit('selected', sector)"
             >
-                {{ sector.name }}
+                {{ sector.name.replace('x','') }}
             </label>
         </template>
     </div>
