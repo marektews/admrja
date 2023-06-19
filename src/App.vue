@@ -95,6 +95,7 @@ function onAddItem() {
         id: -1,
         sid: select_sector.value.sid,
         sra_id: -1,
+        tura: sector_buses.value.length + 1,
         d1: "",
         d2: "",
         d3: ""
@@ -212,7 +213,6 @@ function format_two_digits(n) {
                 </thead>
                 <tbody>
                     <RjItem v-for="(item, index) in sector_buses" :key="index" 
-                        :index="index+1"
                         :zbory="zbory"
                         :sra="sra"
                         :rj-item="item"

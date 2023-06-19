@@ -5,7 +5,6 @@ import BusSelector from './BusSelector.vue'
 defineEmits(['delete'])
 
 const props = defineProps({
-    index: { type: Number },
     rjItem: { type: Object },
     zbory: { type: Array },
     sra: { type: Array },
@@ -47,7 +46,7 @@ const _a3 = computed({
 
 <template>
     <tr>
-        <th scope="row">{{ index }}</th>
+        <th scope="row">{{ props.rjItem?.tura }}</th>
         <td>
             <BusSelector 
                 v-model="_sra_id"
