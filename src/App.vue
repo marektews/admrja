@@ -85,16 +85,12 @@ function find_zbor_id(sra_id) {
     return s.zbor_id
 }
 
-function find_zbor(sra_id) {
-    let zbor_id = find_zbor_id(sra_id)
-    return zbory.value.find((zbor) => zbor.id === zbor_id)
-}
-
 function onAddItem() {
     sector_buses.value.push({
         id: -1,
         sid: select_sector.value.sid,
         sra_id: -1,
+        canceled: false,
         tura: sector_buses.value.length + 1,
         d1: "",
         d2: "",
@@ -105,7 +101,7 @@ function onAddItem() {
 function onSave() {
     let data = {
         sid: select_sector.value.sid,
-        rja: sector_buses.value
+        rja: sector_buses.value,
     }
     console.log('onSave:', data)
     fetch('/api/rja/buses/save', {
@@ -204,7 +200,7 @@ function format_two_digits(n) {
                 <thead>
                     <tr>
                         <th scope="col">#</th>
-                        <th scope="col">Opis pojazdu</th>
+                        <th scope="col">Opis pojazdu oraz flaga anulowania</th>
                         <th scope="col">Piątek <small>(podstawienie / odjazd)</small></th>
                         <th scope="col">Sobota <small>(podstawienie / odjazd)</small></th>
                         <th scope="col">Niedziela <small>(podstawienie / odjazd)</small></th>

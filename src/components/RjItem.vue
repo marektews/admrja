@@ -15,6 +15,12 @@ const _sra_id = computed({
     set(v) { props.rjItem.sra_id = v }
 })
 
+// flaga anulowania
+const _canceled = computed({
+    get() { return props.rjItem.canceled },
+    set(v) { props.rjItem.canceled = v }
+})
+
 // odjazdy
 const _d1 = computed({
     get() { return props.rjItem.d1 },
@@ -48,11 +54,14 @@ const _a3 = computed({
     <tr>
         <th scope="row">{{ props.rjItem?.tura }}</th>
         <td>
-            <BusSelector 
-                v-model="_sra_id"
-                :zbory="props.zbory"
-                :sra="props.sra"
-            />
+            <div class="bus-layout">
+                <input v-model="_canceled" type="checkbox" class="form-check" />
+                <BusSelector 
+                    v-model="_sra_id"
+                    :zbory="props.zbory"
+                    :sra="props.sra"
+                />
+            </div>
         </td>
         <td>
             <div class="times-layout">
@@ -93,6 +102,14 @@ const _a3 = computed({
     flex-direction: row;
     flex-wrap: nowrap;
     gap: 1pt;
+    align-items: center;
+}
+
+.bus-layout {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 3pt;
     align-items: center;
 }
 </style>
