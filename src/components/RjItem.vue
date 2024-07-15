@@ -1,8 +1,10 @@
 <script setup>
 import { computed } from 'vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import BusSelector from './BusSelector.vue'
 
-defineEmits(['delete'])
+const emit = defineEmits(['change', 'delete'])
 
 const props = defineProps({
     rjItem: { type: Object },
@@ -12,41 +14,73 @@ const props = defineProps({
 
 const _sra_id = computed({
     get()  { return props.rjItem.sra_id },
-    set(v) { props.rjItem.sra_id = v }
+    set(v) { 
+        let tmp = props.rjItem
+        tmp.sra_id = v
+        emit('change', tmp) 
+    }
 })
 
 // flaga anulowania
 const _canceled = computed({
     get() { return props.rjItem.canceled },
-    set(v) { props.rjItem.canceled = v }
+    set(v) { 
+        let tmp = props.rjItem
+        tmp.canceled = v
+        emit('change', tmp)
+    }
 })
 
 // odjazdy
 const _d1 = computed({
     get() { return props.rjItem.d1 },
-    set(v) { props.rjItem.d1 = v }
+    set(v) { 
+        let tmp = props.rjItem
+        tmp.rjItem.d1 = v
+        emit('change', tmp)
+    }
 })
 const _d2 = computed({
     get() { return props.rjItem.d2 },
-    set(v) { props.rjItem.d2 = v }
+    set(v) { 
+        let tmp = props.rjItem
+        tmp.rjItem.d2 = v
+        emit('change', tmp)
+    }
 })
 const _d3 = computed({
     get() { return props.rjItem.d3 },
-    set(v) { props.rjItem.d3 = v }
+    set(v) { 
+        let tmp = props.rjItem
+        tmp.rjItem.d3 = v
+        emit('change', tmp)
+    }
 })
 
 //podstawienia
 const _a1 = computed({
     get() { return props.rjItem.a1 },
-    set(v) { props.rjItem.a1 = v }
+    set(v) {
+        let tmp = props.rjItem
+        tmp.rjItem.a1 = v
+        emit('change', tmp)
+    }
 })
 const _a2 = computed({
     get() { return props.rjItem.a2 },
-    set(v) { props.rjItem.a2 = v }
+    set(v) {
+        let tmp = props.rjItem
+        tmp.rjItem.a2 = v
+        emit('change', tmp)
+    }
 })
 const _a3 = computed({
     get() { return props.rjItem.a3 },
-    set(v) { props.rjItem.a3 = v }
+    set(v) {
+        let tmp = props.rjItem
+        tmp.rjItem.a3 = v
+        emit('change', tmp)
+    }
 })
 </script>
 
@@ -82,8 +116,8 @@ const _a3 = computed({
             </div>
         </td>
         <td>
-            <button class="btn btn-danger" title="Kasowanie" @click="$emit('delete')">
-                <i class="fa-solid fa-trash" />
+            <button class="btn btn-danger" title="Kasowanie" @click="emit('delete')">
+                <FontAwesomeIcon :icon="faTrash" />
             </button>
         </td>
     </tr>

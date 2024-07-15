@@ -30,7 +30,7 @@ function onOK() {
                 </div>
                 <div class="modal-body">
                     <p>Podaj czasy odjazdu pierwszej tury</p>
-                    <p class="timings-layout">
+                    <div class="timings-layout">
                         <div>Piątek:</div>
                         <input type="time" class="form-control" v-model="timings.d1">
                         
@@ -45,7 +45,7 @@ function onOK() {
 
                         <div>Podstawienie do bufora (minuty przed odjazdem):</div>
                         <input type="number" class="form-control" v-model.number="timings.arrive">
-                    </p>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>

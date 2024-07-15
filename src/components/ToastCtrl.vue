@@ -8,7 +8,7 @@
             aria-live="assertive"
         >
             <div class="toast-header">
-                <i class="fa-solid fa-circle-info" />
+                <FontAwesomeIcon :icon="faCircleInfo" />
                 <strong class="ms-2 me-auto">Zapis rozkładu jazdy</strong>
                 <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
@@ -25,7 +25,7 @@
             aria-live="assertive"
         >
             <div class="toast-header">
-                <i class="fa-solid fa-circle-info" />
+                <FontAwesomeIcon :icon="faCircleInfo" />
                 <strong class="ms-2 me-auto">Zapis rozkładu jazdy</strong>
                 <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
@@ -33,5 +33,10 @@
                 Zapis zakończony z błędem, za chwilę spróbuj ponownie.
             </div>
         </div>
-</div>
+    </div>
 </template>
+
+<script setup>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+</script>

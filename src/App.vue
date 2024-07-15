@@ -1,11 +1,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import Terminals from './components/Terminals.vue'
-import Sectors from './components/Sectors.vue'
+import { Toast, Modal } from 'bootstrap'
+import TerminalsGroup from './components/TerminalsGroup.vue'
+import SectorsGroup from './components/SectorsGroup.vue'
 import RjItem from './components/RjItem.vue'
-import Ops from './components/Ops.vue'
+import OpsGroup from './components/OpsGroup.vue'
 import TimingModal from './components/TimingModal.vue'
-import Toasts from './components/Toasts.vue'
+import ToastCtrl from './components/ToastCtrl.vue'
 
 const zbory = ref([])       // lista zborów
 const sra = ref([])         // lista zarejestrowanych autokarów
@@ -79,11 +80,11 @@ function load_rja(sector) {
     .catch(err => console.error('Get buses of sector:', sector, 'error:', err))
 }
 
-function find_zbor_id(sra_id) {
-    if(sra_id == -1) return {}
-    let s = sra.value.find((item) => item.id === sra_id)
-    return s.zbor_id
-}
+// function find_zbor_id(sra_id) {
+//     if(sra_id == -1) return {}
+//     let s = sra.value.find((item) => item.id === sra_id)
+//     return s.zbor_id
+// }
 
 function onAddItem() {
     sector_buses.value.push({
@@ -96,6 +97,13 @@ function onAddItem() {
         d2: "",
         d3: ""
     })
+}
+
+function onRjItemChanged(rjItem) {
+    let item = sector_buses.value.find((elem) => elem.id === rjItem.id)
+    if(item) {
+        item = rjItem
+    }
 }
 
 function onSave() {
@@ -115,12 +123,12 @@ function onSave() {
         if(response.status === 200) {
             console.log('RJA: save buses of sector:', select_sector.value.sid, 'OK')
             load_rja(select_sector.value)
-            const toast = new bootstrap.Toast("#saveOk")
+            const toast = new Toast("#saveOk")
             toast.show()
         }
         else {
             console.error('RJA: save buses of sector:', select_sector.value.sid, 'response:', response)
-            const toast = new bootstrap.Toast("#saveError")
+            const toast = new Toast("#saveError")
             toast.show()
         }
     })
@@ -128,7 +136,7 @@ function onSave() {
 }
 
 function onShowTimingModal() {
-    const modal = new bootstrap.Modal('#timingModal', {})
+    const modal = new Modal('#timingModal', {})
     modal.show()
 }
 
@@ -185,8 +193,8 @@ function format_two_digits(n) {
     <div class="container">
         <header>
             <h2>Rozkłady jazdy autokarów</h2>
-            <Terminals :terminals="terminals" @selected="onTerminalSelected" />
-            <Sectors :sectors="sectors" @selected="onSectorSelected" />
+            <TerminalsGroup :terminals="terminals" @selected="onTerminalSelected" />
+            <SectorsGroup :sectors="sectors" @selected="onSectorSelected" />
         </header>
 
         <main v-if="loading.includes(true)">
@@ -208,17 +216,19 @@ function format_two_digits(n) {
                     </tr>
                 </thead>
                 <tbody>
-                    <RjItem v-for="(item, index) in sector_buses" :key="index" 
+                    <RjItem v-for="(item, index) in sector_buses"
+                        :key="index" 
                         :zbory="zbory"
                         :sra="sra"
                         :rj-item="item"
+                        @change="onRjItemChanged"
                         @delete="sector_buses.splice(index,1)"
                     />
                 </tbody>
                 <tfoot>
                     <tr>
                         <td colspan="6">
-                            <Ops 
+                            <OpsGroup 
                                 @add="onAddItem"
                                 @save="onSave"
                                 @timing="onShowTimingModal"
@@ -233,7 +243,7 @@ function format_two_digits(n) {
                 @ok="onModifyTiming"
             />
 
-            <Toasts />
+            <ToastCtrl />
         </main>
     </div>
 </template>

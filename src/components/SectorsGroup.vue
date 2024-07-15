@@ -1,7 +1,7 @@
 <script setup>
 import { watch, ref, nextTick } from 'vue'
 
-defineEmits(['selected'])
+const emit = defineEmits(['selected'])
 
 const props = defineProps({
     sectors: { type: Array, required: true },
@@ -18,7 +18,7 @@ watch(() => props.sectors, (nv) => {
 
 <template>
     <div class="btn-group" role="group">
-        <template v-for="(sector, index) in _sectors">
+        <template v-for="(sector, index) in _sectors" :key="index">
             <input 
                 type="radio" 
                 class="btn-check"
@@ -29,7 +29,7 @@ watch(() => props.sectors, (nv) => {
             <label 
                 class="btn btn-outline-success" 
                 :for="`sector${index}`"
-                @click="$emit('selected', sector)"
+                @click="emit('selected', sector)"
             >
                 {{ sector.name.replace('x','') }}
             </label>
