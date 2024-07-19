@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, provide, onMounted } from 'vue'
 import { Toast, Modal } from 'bootstrap'
 import TerminalsGroup from './components/TerminalsGroup.vue'
 import SectorsGroup from './components/SectorsGroup.vue'
@@ -50,6 +50,8 @@ onMounted(() => {
         errors.value[2] = true
         console.error('Load registered buses error:', err)
     })
+
+    loadBusUsed()
 })
 
 function onTerminalSelected(terminal) {
@@ -128,6 +130,7 @@ function onSave() {
             load_rja(select_sector.value)
             const toast = new Toast("#saveOk")
             toast.show()
+            loadBusUsed()
         }
         else {
             console.error('RJA: save buses of sector:', select_sector.value.sid, 'response:', response)
@@ -190,6 +193,25 @@ function format_two_digits(n) {
     let s = n<10 ? `0${n}` : `${n}`
     return s
 }
+
+const bus_uses = ref([])
+function loadBusUsed() {
+    fetch("/api/rja/buses/used")
+    .then((resp) => {
+        if(resp.status === 200)
+            return resp.json()
+        else
+            return []
+    })
+    .then((data) => bus_uses.value = data)
+}
+function isBusUsed(bus_id) {
+    return bus_uses.value.includes(bus_id)
+}
+provide('isBusUsed', isBusUsed)
+
+
+
 </script>
 
 <template>
@@ -207,7 +229,7 @@ function format_two_digits(n) {
             Wybierz terminal i sektor.
         </main>
         <main v-else>
-            <table class="table table-dark table-bordered">
+            <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th scope="col">#</th>

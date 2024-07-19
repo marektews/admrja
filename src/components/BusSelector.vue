@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, inject } from 'vue'
 
 const props = defineProps({
     modelValue: { type: Number },
@@ -46,11 +46,17 @@ function opt_format(item) {
 
 const selected = ref(props.modelValue)
 watch(selected, (nv) => emit('update:modelValue', nv))
+
+const isBusUsed = inject('isBusUsed')
 </script>
 
 <template>
     <select v-model="selected" class="form-select">
-        <option v-for="(item, index) in all_buses" :key="index" :value="item.sra.id">
+        <option v-for="(item, index) in all_buses" 
+            :key="index" 
+            :value="item.sra.id"
+            :class="{'text-danger': isBusUsed(item.sra.id)}"
+        >
             {{ opt_format(item) }}
         </option>
     </select>
