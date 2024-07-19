@@ -36,7 +36,7 @@ const _d1 = computed({
     get() { return props.rjItem.d1 },
     set(v) { 
         let tmp = props.rjItem
-        tmp.rjItem.d1 = v
+        tmp.d1 = v
         emit('change', tmp)
     }
 })
@@ -44,7 +44,7 @@ const _d2 = computed({
     get() { return props.rjItem.d2 },
     set(v) { 
         let tmp = props.rjItem
-        tmp.rjItem.d2 = v
+        tmp.d2 = v
         emit('change', tmp)
     }
 })
@@ -52,7 +52,7 @@ const _d3 = computed({
     get() { return props.rjItem.d3 },
     set(v) { 
         let tmp = props.rjItem
-        tmp.rjItem.d3 = v
+        tmp.d3 = v
         emit('change', tmp)
     }
 })
@@ -62,7 +62,7 @@ const _a1 = computed({
     get() { return props.rjItem.a1 },
     set(v) {
         let tmp = props.rjItem
-        tmp.rjItem.a1 = v
+        tmp.a1 = v
         emit('change', tmp)
     }
 })
@@ -70,7 +70,7 @@ const _a2 = computed({
     get() { return props.rjItem.a2 },
     set(v) {
         let tmp = props.rjItem
-        tmp.rjItem.a2 = v
+        tmp.a2 = v
         emit('change', tmp)
     }
 })
@@ -78,7 +78,7 @@ const _a3 = computed({
     get() { return props.rjItem.a3 },
     set(v) {
         let tmp = props.rjItem
-        tmp.rjItem.a3 = v
+        tmp.a3 = v
         emit('change', tmp)
     }
 })

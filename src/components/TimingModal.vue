@@ -21,7 +21,7 @@ function onOK() {
 </script>
 
 <template>
-    <div class="modal modal-dark" tabindex="-1">
+    <div class="modal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -62,16 +62,6 @@ function onOK() {
 </template>
 
 <style>
-@media (prefers-color-scheme: dark) {
-    div.modal-content {
-        background-color: var(--color-background) !important;
-    }
-
-    .btn-close {
-        color: var(--color-text) !important;
-    }
-}
-
 .timings-layout {
     display: grid;
     grid-template-columns: auto auto;

@@ -95,7 +95,10 @@ function onAddItem() {
         tura: sector_buses.value.length + 1,
         d1: "",
         d2: "",
-        d3: ""
+        d3: "",
+        a1: "",
+        a2: "",
+        a3: "",
     })
 }
 
