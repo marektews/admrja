@@ -1,6 +1,69 @@
+<template>
+    <div class="container">
+        <header class="mb-3">
+            <h2>Rozkłady jazdy autokarów</h2>
+            <div class="mb-2 mt-3 d-flex align-items-center">
+                <TuraGroup @selected="onTuraSelected" class="me-5" />
+                <TerminalsGroup :terminals="terminals" @selected="onTerminalSelected" />
+            </div>
+            <SectorsGroup :sectors="sectors" @selected="onSectorSelected" />
+        </header>
+
+        <main v-if="loading.includes(true)">
+            Trwa ładowanie danych ...
+        </main>
+        <main v-else-if="sector_buses == undefined">
+            Wybierz terminal i sektor.
+        </main>
+        <main v-else>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Opis pojazdu oraz flaga anulowania</th>
+                        <th scope="col">Piątek <small>(podstawienie / odjazd)</small></th>
+                        <th scope="col">Sobota <small>(podstawienie / odjazd)</small></th>
+                        <th scope="col">Niedziela <small>(podstawienie / odjazd)</small></th>
+                        <th scope="col">Ops</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <RjItem v-for="(item, index) in sector_buses"
+                        :key="index" 
+                        :zbory="zbory"
+                        :sra="sra"
+                        :rj-item="item"
+                        @change="onRjItemChanged"
+                        @delete="sector_buses.splice(index,1)"
+                    />
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="6">
+                            <OpsGroup 
+                                @add="onAddItem"
+                                @save="onSave"
+                                @timing="onShowTimingModal"
+                            />
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <TimingModal 
+                id="timingModal"
+                @ok="onModifyTiming"
+            />
+
+            <ToastCtrl />
+        </main>
+    </div>
+</template>
+
 <script setup>
-import { ref, provide, onMounted } from 'vue'
+import { ref, provide, watch, onMounted } from 'vue'
 import { Toast, Modal } from 'bootstrap'
+import TuraGroup from './components/TuraGroup.vue'
 import TerminalsGroup from './components/TerminalsGroup.vue'
 import SectorsGroup from './components/SectorsGroup.vue'
 import RjItem from './components/RjItem.vue'
@@ -12,12 +75,22 @@ const zbory = ref([])       // lista zborów
 const sra = ref([])         // lista zarejestrowanych autokarów
 const terminals = ref([])
 const sectors = ref([])
+const select_tura = ref(2)
+const select_terminal = ref(undefined)
 const select_sector = ref(undefined)
 const sector_buses = ref(undefined)
-const loading = ref([true, true, true])
-const errors = ref([false, false, false])
+const loading = ref([true, true, true, true])
+const errors = ref([false, false, false, false])
 
-onMounted(() => {
+watch(select_tura, () => {
+    loading.value = [false, true, true, true]
+    sector_buses.value = undefined
+    loadZbory()
+    loadSRA()
+    loadBusUsed()
+})
+
+function loadTerminals() {
     fetch('/api/rja/terminals')
     .then(response => response.json())
     .then(d => {
@@ -27,9 +100,17 @@ onMounted(() => {
     .catch(err => {
         errors.value[0] = true
         console.error('Load terminals error:', err)
-    })
+    })    
+}
 
-    fetch('/api/rja/zbory')
+function loadZbory() {
+    fetch('/api/rja/zbory', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tura: select_tura.value }),
+    })
     .then(response => response.json())
     .then(d => {
         zbory.value = d
@@ -39,8 +120,16 @@ onMounted(() => {
         errors.value[1] = true
         console.error('Get congregations list error:', err)
     })
+}
 
-    fetch('/api/rja/sra')
+function loadSRA() {
+    fetch('/api/rja/sra', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tura: select_tura.value }),
+    })
     .then(response => response.json())
     .then(d => {
         sra.value = d
@@ -50,12 +139,33 @@ onMounted(() => {
         errors.value[2] = true
         console.error('Load registered buses error:', err)
     })
+}
 
+onMounted(() => {
+    loadTerminals()
+    loadZbory()
+    loadSRA()
     loadBusUsed()
 })
 
+function onTuraSelected(tura) {
+    console.log('Tura selected:', tura)
+    select_tura.value = tura
+}
+
 function onTerminalSelected(terminal) {
     console.log('Terminal selected:', terminal)
+    select_terminal.value = terminal
+    load_sectors(terminal)
+}
+
+function onSectorSelected(sector) {
+    console.log('Sector selected:', sector)
+    select_sector.value = sector
+    load_rja(sector)
+}
+
+function load_sectors(terminal) {
     fetch(`/api/rja/sectors/${terminal.tid}`)
     .then(response => response.json())
     .then(d => {
@@ -66,14 +176,14 @@ function onTerminalSelected(terminal) {
     .catch(err => console.error('Get sectors of terminal:', terminal, 'error:', err))
 }
 
-function onSectorSelected(sector) {
-    console.log('Sector selected:', sector)
-    select_sector.value = sector
-    load_rja(sector)
-}
-
 function load_rja(sector) {
-    fetch(`/api/rja/buses/${sector.sid}`)
+    fetch(`/api/rja/buses/${sector.sid}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ tura: select_tura.value }),
+    })
     .then(response => response.json())
     .then(d => {
         sector_buses.value = d
@@ -113,6 +223,7 @@ function onRjItemChanged(rjItem) {
 
 function onSave() {
     let data = {
+        tura: select_tura.value,
         sid: select_sector.value.sid,
         rja: sector_buses.value,
     }
@@ -196,82 +307,29 @@ function format_two_digits(n) {
 
 const bus_uses = ref([])
 function loadBusUsed() {
-    fetch("/api/rja/buses/used")
+    fetch("/api/rja/buses/used", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tura: select_tura.value }),
+    })
     .then((resp) => {
         if(resp.status === 200)
             return resp.json()
         else
             return []
     })
-    .then((data) => bus_uses.value = data)
+    .then((data) => {
+        bus_uses.value = data
+        loading.value[3] = false
+    })
 }
 function isBusUsed(bus_id) {
     return bus_uses.value.includes(bus_id)
 }
 provide('isBusUsed', isBusUsed)
-
-
-
 </script>
-
-<template>
-    <div class="container">
-        <header>
-            <h2>Rozkłady jazdy autokarów</h2>
-            <TerminalsGroup :terminals="terminals" @selected="onTerminalSelected" />
-            <SectorsGroup :sectors="sectors" @selected="onSectorSelected" />
-        </header>
-
-        <main v-if="loading.includes(true)">
-            Trwa ładowanie danych ...
-        </main>
-        <main v-else-if="sector_buses == undefined">
-            Wybierz terminal i sektor.
-        </main>
-        <main v-else>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Opis pojazdu oraz flaga anulowania</th>
-                        <th scope="col">Piątek <small>(podstawienie / odjazd)</small></th>
-                        <th scope="col">Sobota <small>(podstawienie / odjazd)</small></th>
-                        <th scope="col">Niedziela <small>(podstawienie / odjazd)</small></th>
-                        <th scope="col">Ops</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <RjItem v-for="(item, index) in sector_buses"
-                        :key="index" 
-                        :zbory="zbory"
-                        :sra="sra"
-                        :rj-item="item"
-                        @change="onRjItemChanged"
-                        @delete="sector_buses.splice(index,1)"
-                    />
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="6">
-                            <OpsGroup 
-                                @add="onAddItem"
-                                @save="onSave"
-                                @timing="onShowTimingModal"
-                            />
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
-
-            <TimingModal 
-                id="timingModal"
-                @ok="onModifyTiming"
-            />
-
-            <ToastCtrl />
-        </main>
-    </div>
-</template>
 
 <style scoped>
 header {

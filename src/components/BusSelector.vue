@@ -12,13 +12,14 @@ const emit = defineEmits(['update:modelValue'])
 
 const all_buses = computed(() => {
     let res = []
-    if(props.sra.length) {
+    if(props.sra.length && props.zbory.length) {
         props.sra.forEach((elem) => {
             let tmp = { 
                 sra: elem,
                 zbor: props.zbory.find((z) => z.id === elem.zbor_id)
             }
-            res.push(tmp)
+            if(tmp.zbor)
+                res.push(tmp)
         })
         res.sort((a, b) => {
             let tmp = sort_helper(a.zbor.lang, b.zbor.lang)
@@ -38,10 +39,13 @@ function sort_helper(a, b) {
 }
 
 function opt_format(item) {
-    if(item.sra.lp === null)
-        return `${item.zbor.lang} | ${item.zbor.number} | ${item.zbor.name}`
-    else
-        return `${item.zbor.lang} | ${item.zbor.number} | ${item.zbor.name} (${ item.sra.lp })`
+    if(item.zbor) {
+        if(item.sra.lp === null)
+            return `${item.zbor.lang} | ${item.zbor.number} | ${item.zbor.name}`
+        else
+            return `${item.zbor.lang} | ${item.zbor.number} | ${item.zbor.name} (${ item.sra.lp })`
+    }
+    return ""
 }
 
 const selected = ref(props.modelValue)
