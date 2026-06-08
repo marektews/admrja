@@ -1,13 +1,29 @@
 <script setup>
-const props = defineProps({
-    terminals: { type: Array, required: true },
-})
+import { ref, onMounted } from 'vue'
+
+const terminals = ref([])
 const emit = defineEmits(['selected'])
+
+onMounted(() => {
+    loadTerminals()
+})
+
+function loadTerminals() {
+    fetch('/api/rja/terminals')
+    .then(response => response.json())
+    .then(d => {
+        terminals.value = d
+    })
+    .catch(err => {
+        console.error('Load terminals error:', err)
+    })    
+}
+
 </script>
 
 <template>
     <div class="btn-group" role="group">
-        <template v-for="(terminal, index) in props.terminals" :key="index">
+        <template v-for="(terminal, index) in terminals" :key="index">
             <input 
                 type="radio" 
                 class="btn-check"

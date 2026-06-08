@@ -3,13 +3,13 @@
         <header class="mb-3">
             <h2>Rozkłady jazdy autokarów</h2>
             <div class="mb-2 mt-3 d-flex align-items-center">
-                <TuraGroup @selected="onTuraSelected" class="me-5" />
-                <TerminalsGroup :terminals="terminals" @selected="onTerminalSelected" />
+                <TuraGroup v-model="select_tura" class="me-5" />
+                <TerminalsGroup @selected="onTerminalSelected" />
             </div>
-            <SectorsGroup :sectors="sectors" @selected="onSectorSelected" />
+            <SectorsGroup :terminal="select_terminal" @selected="onSectorSelected" />
         </header>
 
-        <main v-if="loading.includes(true)">
+        <main v-if="zbory === undefined || sra === undefined">
             Trwa ładowanie danych ...
         </main>
         <main v-else-if="sector_buses == undefined">
@@ -71,37 +71,23 @@ import OpsGroup from './components/OpsGroup.vue'
 import TimingModal from './components/TimingModal.vue'
 import ToastCtrl from './components/ToastCtrl.vue'
 
-const zbory = ref([])       // lista zborów
-const sra = ref([])         // lista zarejestrowanych autokarów
-const terminals = ref([])
-const sectors = ref([])
-const select_tura = ref(2)
+const zbory = ref(undefined)        // lista zborów
+const sra = ref(undefined)          // lista zarejestrowanych autokarów
+const select_tura = ref(undefined)
 const select_terminal = ref(undefined)
 const select_sector = ref(undefined)
 const sector_buses = ref(undefined)
-const loading = ref([true, true, true, true])
-const errors = ref([false, false, false, false])
+
+onMounted(() => {
+    loadWhichActiveTura()
+})
 
 watch(select_tura, () => {
-    loading.value = [false, true, true, true]
     sector_buses.value = undefined
     loadZbory()
     loadSRA()
     loadBusUsed()
 })
-
-function loadTerminals() {
-    fetch('/api/rja/terminals')
-    .then(response => response.json())
-    .then(d => {
-        terminals.value = d
-        loading.value[0] = false
-    })
-    .catch(err => {
-        errors.value[0] = true
-        console.error('Load terminals error:', err)
-    })    
-}
 
 function loadZbory() {
     fetch('/api/rja/zbory', {
@@ -114,76 +100,47 @@ function loadZbory() {
     .then(response => response.json())
     .then(d => {
         zbory.value = d
-        loading.value[1] = false
     })
     .catch(err => {
-        errors.value[1] = true
         console.error('Get congregations list error:', err)
     })
 }
 
 function loadSRA() {
-    fetch('/api/rja/sra', {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ tura: select_tura.value }),
-    })
+    fetch(`/api/rja/sra/${select_tura.value}`)
     .then(response => response.json())
     .then(d => {
         sra.value = d
-        loading.value[2] = false
+        console.log('Load registered buses:', d)
     })
     .catch(err => {
-        errors.value[2] = true
         console.error('Load registered buses error:', err)
     })
 }
 
-onMounted(() => {
-    loadTerminals()
-    loadZbory()
-    loadSRA()
-    loadBusUsed()
-})
-
-function onTuraSelected(tura) {
-    console.log('Tura selected:', tura)
-    select_tura.value = tura
+function loadWhichActiveTura() {
+    fetch('/api/config/active/tura')
+    .then(response => response.json())
+    .then(data => {
+        select_tura.value = data.tid
+        console.log('Load which tura is active:', data)
+    })
+    .catch(err => console.error('Load which tura error:', err))
 }
 
 function onTerminalSelected(terminal) {
     console.log('Terminal selected:', terminal)
-    select_terminal.value = terminal
-    load_sectors(terminal)
+    select_terminal.value = { ...terminal }
 }
 
 function onSectorSelected(sector) {
     console.log('Sector selected:', sector)
     select_sector.value = sector
-    load_rja(sector)
+    loadRJA(sector)
 }
 
-function load_sectors(terminal) {
-    fetch(`/api/rja/sectors/${terminal.tid}`)
-    .then(response => response.json())
-    .then(d => {
-        sectors.value = d
-        sector_buses.value = undefined
-        console.log('Get sectors of terminal:', terminal, 'list:', d)
-    })
-    .catch(err => console.error('Get sectors of terminal:', terminal, 'error:', err))
-}
-
-function load_rja(sector) {
-    fetch(`/api/rja/buses/${sector.sid}`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ tura: select_tura.value }),
-    })
+function loadRJA(sector) {
+    fetch(`/api/rja/buses/${sector.sid}/${select_tura.value}`)
     .then(response => response.json())
     .then(d => {
         sector_buses.value = d
@@ -200,11 +157,10 @@ function load_rja(sector) {
 
 function onAddItem() {
     sector_buses.value.push({
-        id: -1,
         sid: select_sector.value.sid,
-        sra_id: -1,
+        sra_id: "",
         canceled: false,
-        tura: sector_buses.value.length + 1,
+        sector_order: sector_buses.value.length + 1,
         d1: "",
         d2: "",
         d3: "",
@@ -223,7 +179,7 @@ function onRjItemChanged(rjItem) {
 
 function onSave() {
     let data = {
-        tura: select_tura.value,
+        tura_id: select_tura.value,
         sid: select_sector.value.sid,
         rja: sector_buses.value,
     }
@@ -238,7 +194,7 @@ function onSave() {
     .then(response => {
         if(response.status === 200) {
             console.log('RJA: save buses of sector:', select_sector.value.sid, 'OK')
-            load_rja(select_sector.value)
+            loadRJA(select_sector.value)
             const toast = new Toast("#saveOk")
             toast.show()
             loadBusUsed()
@@ -307,13 +263,7 @@ function format_two_digits(n) {
 
 const bus_uses = ref([])
 function loadBusUsed() {
-    fetch("/api/rja/buses/used", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ tura: select_tura.value }),
-    })
+    fetch(`/api/rja/buses/used/${select_tura.value}`)
     .then((resp) => {
         if(resp.status === 200)
             return resp.json()
@@ -322,7 +272,7 @@ function loadBusUsed() {
     })
     .then((data) => {
         bus_uses.value = data
-        loading.value[3] = false
+        console.log('Load used buses:', data)
     })
 }
 function isBusUsed(bus_id) {

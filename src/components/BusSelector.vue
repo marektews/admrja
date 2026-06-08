@@ -2,7 +2,7 @@
 import { ref, computed, watch, inject } from 'vue'
 
 const props = defineProps({
-    modelValue: { type: Number },
+    modelValue: { type: String },
     zbory: { type: Array },
     sra: { type: Array },
 })
@@ -16,11 +16,12 @@ const all_buses = computed(() => {
         props.sra.forEach((elem) => {
             let tmp = { 
                 sra: elem,
-                zbor: props.zbory.find((z) => z.id === elem.zbor_id)
+                zbor: props.zbory.find((z) => z.id === elem.congregation_id)
             }
             if(tmp.zbor)
                 res.push(tmp)
         })
+        // console.log('All buses:', res)
         res.sort((a, b) => {
             let tmp = sort_helper(a.zbor.lang, b.zbor.lang)
             if(tmp !== 0) return tmp
@@ -40,10 +41,10 @@ function sort_helper(a, b) {
 
 function opt_format(item) {
     if(item.zbor) {
-        if(item.sra.lp === null)
-            return `${item.zbor.lang} | ${item.zbor.number} | ${item.zbor.name}`
-        else
+        if("lp" in item.sra)
             return `${item.zbor.lang} | ${item.zbor.number} | ${item.zbor.name} (${ item.sra.lp })`
+        else
+            return `${item.zbor.lang} | ${item.zbor.number} | ${item.zbor.name}`
     }
     return ""
 }
