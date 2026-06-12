@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command, mode }) =>{
+export default defineConfig(({ command }) => {
     const isProduction = command === 'build';
     return {
         base: isProduction ? '/admin/rja/' : '/',
