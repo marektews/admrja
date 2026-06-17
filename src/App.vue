@@ -12,8 +12,11 @@
         <main v-if="zbory === undefined || sra === undefined">
             Trwa ładowanie danych ...
         </main>
+        <main v-else-if="select_terminal == undefined">
+            Wybierz terminal.
+        </main>
         <main v-else-if="sector_buses == undefined">
-            Wybierz terminal i sektor.
+            Wybierz sektor.
         </main>
         <main v-else>
             <table class="table table-bordered">
@@ -90,13 +93,7 @@ watch(select_tura, () => {
 })
 
 function loadZbory() {
-    fetch('/api/rja/zbory', {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ tura: select_tura.value }),
-    })
+    fetch(`/api/rja/zbory/${select_tura.value}`)
     .then(response => response.json())
     .then(d => {
         zbory.value = d
@@ -131,6 +128,10 @@ function loadWhichActiveTura() {
 function onTerminalSelected(terminal) {
     console.log('Terminal selected:', terminal)
     select_terminal.value = { ...terminal }
+    // po zmianie terminala czyścimy poprzedni sektor i jego rozkład jazdy,
+    // żeby nie pozostawała stara zawartość tabeli
+    select_sector.value = undefined
+    sector_buses.value = undefined
 }
 
 function onSectorSelected(sector) {
